@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
+import jwt from 'jsonwebtoken'
 import { prisma } from '../lib/prisma'
 
 // Rotas públicas para a página de agendamento do cliente
@@ -76,6 +77,21 @@ export async function bookingRoutes(app: FastifyInstance) {
       })
     }
 
+    // Gerar Token para o cliente (sessão curta ou longa conforme preferência)
+    const token = jwt.sign(
+      { sub: client.id, shopId, role: 'CLIENT' },
+      process.env.JWT_SECRET!,
+      { expiresIn: '30d' }
+    )
+
+    reply.setCookie('client_token', token, {
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 60 * 60 * 24 * 30, // 30 dias
+    })
+
     return {
       client: {
         id:            client.id,
@@ -83,7 +99,8 @@ export async function bookingRoutes(app: FastifyInstance) {
         phone:         client.phone,
         email:         client.email,
         subscription:  client.subscriptions[0] ?? null,
-      }
+      },
+      token // Retrocompatibilidade
     }
   })
 

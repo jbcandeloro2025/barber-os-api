@@ -23,10 +23,16 @@ import { subscriptionRoutes } from './routes/subscriptions'
 import { webhookRoutes } from './routes/webhooks'
 import { whatsappRoutes } from './routes/whatsapp'
 import { bookingRoutes } from './routes/booking'
+import cookie from '@fastify/cookie'
 
 const app = fastify({ 
   logger: true,
-  bodyLimit: 2 * 1024 * 1024 // Limite de 2MB (Inspirado no back-delivery)
+  bodyLimit: 2 * 1024 * 1024 // Limite de 2MB
+})
+
+app.register(cookie, {
+  secret: process.env.COOKIE_SECRET || 'barber-os-secret-key-123',
+  hook: 'onRequest'
 })
 
 // 🛡️ Camada de Segurança: Helmet (Headers HTTP)
@@ -46,6 +52,7 @@ app.register(rateLimit, {
 // Configuração de CORS
 app.register(cors, {
   origin: true,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 })
 

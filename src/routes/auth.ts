@@ -50,6 +50,15 @@ export async function authRoutes(app: FastifyInstance) {
       { expiresIn: '7d' }
     )
 
+    // 4. Set Secure Cookie
+    reply.setCookie('auth_token', token, {
+      path: '/',
+      httpOnly: true,
+      secure: true, // Sempre secure em produção/modern browsers
+      sameSite: 'none', // Necessário para cross-origin (Easypanel/Vercel/etc)
+      maxAge: 60 * 60 * 24 * 7, // 7 dias
+    })
+
     return reply.status(200).send({
       user: {
         id: user.id,
@@ -58,8 +67,13 @@ export async function authRoutes(app: FastifyInstance) {
         role: user.role,
         shop: user.shop
       },
-      token
+      token // Mantemos o token no body temporariamente para retrocompatibilidade
     })
+  })
+
+  app.post('/logout', async (request, reply) => {
+    reply.clearCookie('auth_token', { path: '/' })
+    return { message: 'Logged out successfully.' }
   })
 
   app.get('/me', { onRequest: [authMiddleware] }, async (request, reply) => {

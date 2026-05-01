@@ -2,13 +2,11 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import jwt from 'jsonwebtoken'
 
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
-  const authHeader = request.headers.authorization
+  const token = request.cookies.auth_token || request.headers.authorization?.split(' ')[1]
 
-  if (!authHeader) {
+  if (!token) {
     return reply.status(401).send({ message: 'Token is missing.' })
   }
-
-  const [, token] = authHeader.split(' ')
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
