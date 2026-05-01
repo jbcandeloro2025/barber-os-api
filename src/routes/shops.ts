@@ -10,7 +10,7 @@ export async function shopRoutes(app: FastifyInstance) {
   app.get('/me', { preHandler: [authMiddleware] }, async (request) => {
     const shop = await prisma.shop.findUnique({
       where: { id: request.user.shopId },
-      select: { id: true, name: true, logo_url: true, config: true }
+      select: { id: true, name: true, slug: true, logo_url: true, config: true }
     })
     return { shop }
   })
@@ -19,6 +19,7 @@ export async function shopRoutes(app: FastifyInstance) {
   app.patch('/me', { preHandler: [authMiddleware] }, async (request) => {
     const schema = z.object({
       name:      z.string().min(1).optional(),
+      slug:      z.string().min(3).optional(),
       logo_url:  z.string().optional(),
       config:    z.any().optional(),
     })
@@ -27,10 +28,11 @@ export async function shopRoutes(app: FastifyInstance) {
       where: { id: request.user.shopId },
       data: {
         name: data.name,
+        slug: data.slug,
         logo_url: data.logo_url,
         config: data.config,
       },
-      select: { id: true, name: true, logo_url: true, config: true }
+      select: { id: true, name: true, slug: true, logo_url: true, config: true }
     })
     return { shop }
   })

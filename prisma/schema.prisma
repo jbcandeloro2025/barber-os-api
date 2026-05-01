@@ -46,6 +46,7 @@ enum PaymentStatus {
 model Shop {
   id                  String             @id @default(uuid())
   owner_id            String             @unique
+  slug                String?            @unique
   name                String
   logo_url            String?
   plan_id             String             @default("FREE")
