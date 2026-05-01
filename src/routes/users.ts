@@ -63,7 +63,7 @@ export async function userRoutes(app: FastifyInstance) {
   app.delete('/:id', { preHandler: [checkRole(['ADMIN'])] }, async (request, reply) => {
     const { id } = z.object({ id: z.string().uuid() }).parse(request.params)
 
-    if (id === request.user.sub) {
+    if (id === request.user.id) {
       return reply.status(400).send({ message: 'Você não pode excluir sua própria conta.' })
     }
 

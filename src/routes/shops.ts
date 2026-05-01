@@ -20,12 +20,16 @@ export async function shopRoutes(app: FastifyInstance) {
     const schema = z.object({
       name:      z.string().min(1).optional(),
       logo_url:  z.string().optional(),
-      config:    z.record(z.unknown()).optional(),
+      config:    z.any().optional(),
     })
     const data = schema.parse(request.body)
     const shop = await prisma.shop.update({
       where: { id: request.user.shopId },
-      data,
+      data: {
+        name: data.name,
+        logo_url: data.logo_url,
+        config: data.config,
+      },
       select: { id: true, name: true, logo_url: true, config: true }
     })
     return { shop }

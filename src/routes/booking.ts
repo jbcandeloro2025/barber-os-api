@@ -105,8 +105,12 @@ export async function bookingRoutes(app: FastifyInstance) {
         status: { in: ['PENDING', 'CONFIRMED'] },
         scheduled_at: { gte: start, lte: end }
       },
-      include: { service: { select: { duration: true } } },
-      select: { scheduled_at: true, service: true }
+      select: { 
+        scheduled_at: true, 
+        service: { 
+          select: { duration: true } 
+        } 
+      }
     })
 
     const blocked = appointments.map(ap => {

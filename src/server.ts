@@ -66,12 +66,12 @@ app.register(whatsappRoutes, { prefix: '/whatsapp' })
 app.register(bookingRoutes, { prefix: '/booking' })
 
 // Webhook precisa de tratamento especial de corpo bruto (Raw Body)
-app.register(webhookRoutes, { prefix: '/webhooks' }, (instance, opts, done) => {
+app.register(async (instance) => {
   instance.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
     done(null, body)
   })
-  done()
-})
+  instance.register(webhookRoutes)
+}, { prefix: '/webhooks' })
 
 // 🚑 Global Error Handler
 app.setErrorHandler((error, request, reply) => {
