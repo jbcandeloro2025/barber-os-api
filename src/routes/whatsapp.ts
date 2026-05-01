@@ -63,4 +63,19 @@ export async function whatsappRoutes(app: FastifyInstance) {
       return { success: false, message: 'Erro ao desconectar' }
     }
   })
+
+  app.post('/send-test', async (request, reply) => {
+    const { number, message } = request.body as { number: string, message: string }
+    const shopId = request.user.shopId
+    
+    try {
+      await whatsappService.sendMessage(shopId, number, message || '🚀 Teste de conexão BarberOS: Integrado com sucesso!')
+      return { success: true, message: 'Mensagem enviada!' }
+    } catch (error: any) {
+      return reply.status(500).send({ 
+        success: false, 
+        message: error.message || 'Erro ao enviar mensagem' 
+      })
+    }
+  })
 }
