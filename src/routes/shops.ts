@@ -101,6 +101,15 @@ export async function shopRoutes(app: FastifyInstance) {
         { expiresIn: '7d' }
       )
 
+      // 5. Set Secure Cookie
+      reply.setCookie('auth_token', token, {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 60 * 60 * 24 * 7,
+      })
+
       return reply.status(201).send({
         shop: {
           id: result.shop.id,
@@ -111,7 +120,7 @@ export async function shopRoutes(app: FastifyInstance) {
           name: result.user.name,
           email: result.user.email
         },
-        token
+        token // Mantido para retrocompatibilidade
       })
 
     } catch (err) {
