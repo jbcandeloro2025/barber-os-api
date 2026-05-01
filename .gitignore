@@ -2,6 +2,7 @@ node_modules
 dist
 .env
 .env.local
+!.env.example
 .gemini
 .windsurf
 *.log
@@ -11,3 +12,4 @@ yarn-error.log*
 .DS_Store
 prisma/migrations
 /uploads
+*.md
