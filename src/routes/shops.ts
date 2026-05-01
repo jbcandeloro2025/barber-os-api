@@ -10,7 +10,15 @@ export async function shopRoutes(app: FastifyInstance) {
   app.get('/me', { preHandler: [authMiddleware] }, async (request) => {
     const shop = await prisma.shop.findUnique({
       where: { id: request.user.shopId },
-      select: { id: true, name: true, slug: true, logo_url: true, config: true }
+      select: { 
+        id: true, 
+        name: true, 
+        slug: true, 
+        logo_url: true, 
+        config: true,
+        subscription_status: true,
+        stripe_customer_id: true
+      }
     })
     return { shop }
   })
