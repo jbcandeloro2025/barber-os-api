@@ -1,0 +1,214 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  ADMIN
+  ATENDENTE
+  PROFISSIONAL
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELED
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID_AT_PDV
+  PAID_BY_SUBSCRIPTION
+  FAILED
+}
+
+model Shop {
+  id                  String             @id @default(uuid())
+  owner_id            String             @unique
+  name                String
+  logo_url            String?
+  plan_id             String             @default("FREE")
+  subscription_status SubscriptionStatus @default(TRIALING)
+  stripe_customer_id  String?
+  config              Json? // Tema, Banner, Cores, etc.
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+
+  users              User[]
+  professionals      Professional[]
+  services           Service[]
+  clients            Client[]
+  subscription_plans SubscriptionPlan[]
+  appointments       Appointment[]
+  products           Product[]
+  transactions       Transaction[]
+}
+
+model User {
+  id              String   @id @default(uuid())
+  shop_id         String
+  email           String   @unique
+  password_hash   String
+  name            String
+  role            UserRole @default(PROFISSIONAL)
+  professional_id String?  @unique
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  shop         Shop          @relation(fields: [shop_id], references: [id])
+  professional Professional? @relation(fields: [professional_id], references: [id])
+}
+
+model Professional {
+  id              String   @id @default(uuid())
+  shop_id         String
+  name            String
+  avatar_url      String?
+  specialties     String[]
+  commission_rate Decimal  @db.Decimal(5, 2)
+  work_hours      Json? // Horários de início/fim por dia da semana
+  active          Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  shop         Shop          @relation(fields: [shop_id], references: [id])
+  appointments Appointment[]
+  user         User?
+
+  @@index([shop_id])
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  shop_id     String
+  title       String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  duration    Int // Duração em minutos
+  active      Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  shop         Shop          @relation(fields: [shop_id], references: [id])
+  appointments Appointment[]
+}
+
+model Client {
+  id         String   @id @default(uuid())
+  shop_id    String
+  name       String
+  phone      String?
+  email      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  shop          Shop           @relation(fields: [shop_id], references: [id])
+  appointments  Appointment[]
+  subscriptions Subscription[]
+
+  @@index([shop_id])
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  shop_id         String
+  client_id       String
+  professional_id String
+  service_id      String
+  scheduled_at    DateTime
+  status          AppointmentStatus @default(PENDING)
+  payment_status  PaymentStatus     @default(PENDING)
+  notes           String?
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+
+  shop         Shop          @relation(fields: [shop_id], references: [id])
+  client       Client        @relation(fields: [client_id], references: [id])
+  professional Professional  @relation(fields: [professional_id], references: [id])
+  service      Service       @relation(fields: [service_id], references: [id])
+  transactions Transaction[]
+
+  @@index([shop_id])
+  @@index([professional_id, scheduled_at])
+  @@index([client_id])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  shop_id     String
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  min_stock   Int      @default(5)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  shop Shop @relation(fields: [shop_id], references: [id])
+
+  @@index([shop_id])
+}
+
+model SubscriptionPlan {
+  id          String   @id @default(uuid())
+  shop_id     String
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  benefits    String[]
+  duration_id String // mensal, trimestral, etc.
+  active      Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  shop          Shop           @relation(fields: [shop_id], references: [id])
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id         String   @id @default(uuid())
+  client_id  String
+  plan_id    String
+  start_date DateTime @default(now())
+  end_date   DateTime
+  active     Boolean  @default(true)
+
+  client Client           @relation(fields: [client_id], references: [id])
+  plan   SubscriptionPlan @relation(fields: [plan_id], references: [id])
+}
+
+model Transaction {
+  id             String          @id @default(uuid())
+  shop_id        String
+  appointment_id String?
+  amount         Decimal         @db.Decimal(10, 2)
+  type           TransactionType // INCOME ou EXPENSE
+  payment_method String // PIX, CARD, CASH, SUBSCRIPTION_REDEEM
+  description    String?
+  created_at     DateTime        @default(now())
+
+  shop        Shop         @relation(fields: [shop_id], references: [id])
+  appointment Appointment? @relation(fields: [appointment_id], references: [id])
+
+  @@index([shop_id, created_at])
+}
