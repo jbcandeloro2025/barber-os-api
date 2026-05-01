@@ -17,8 +17,13 @@ RUN \
   else npm install; \
   fi
 
-# Copiar código fonte, gerar Prisma e fazer build
+# Copiar código fonte
 COPY . .
+
+# Criar pasta de uploads para evitar erro no fastify-static
+RUN mkdir -p uploads
+
+# Copiar código fonte, gerar Prisma e fazer build
 RUN npx prisma generate
 RUN npm run build
 
@@ -34,6 +39,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
+RUN mkdir -p uploads
 
 EXPOSE 3333
 
