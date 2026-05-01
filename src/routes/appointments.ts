@@ -112,12 +112,13 @@ export async function appointmentRoutes(app: FastifyInstance) {
         client: true,
         professional: true,
         service: true,
+        shop: { select: { name: true } }
       }
     })
 
     // 🚀 4. Notificar via WhatsApp (Assíncrono para não travar a resposta)
     const instanceName = `barber_${request.user.shopId.replace(/-/g, '')}`
-    const message = `✅ *Agendamento Confirmado!*\n\nOlá ${appointment.client.name}, seu horário na *${appointment.shop_id}* foi confirmado:\n\n📅 *Data:* ${dayjs(appointment.scheduled_at).format('DD/MM/YYYY')}\n⏰ *Hora:* ${dayjs(appointment.scheduled_at).format('HH:mm')}\n💈 *Serviço:* ${appointment.service.title}\n👤 *Barbeiro:* ${appointment.professional.name}\n\nTe esperamos lá! ✂️`
+    const message = `✅ *Agendamento Confirmado!*\n\nOlá ${appointment.client.name}, seu horário na *${appointment.shop.name}* foi confirmado:\n\n📅 *Data:* ${dayjs(appointment.scheduled_at).format('DD/MM/YYYY')}\n⏰ *Hora:* ${dayjs(appointment.scheduled_at).format('HH:mm')}\n💈 *Serviço:* ${appointment.service.title}\n👤 *Barbeiro:* ${appointment.professional.name}\n\nTe esperamos lá! ✂️`
 
     if (appointment.client.phone) {
       whatsappService.sendMessage(instanceName, appointment.client.phone, message).catch(console.error)

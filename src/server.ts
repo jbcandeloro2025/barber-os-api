@@ -23,6 +23,7 @@ import { subscriptionRoutes } from './routes/subscriptions'
 import { webhookRoutes } from './routes/webhooks'
 import { whatsappRoutes } from './routes/whatsapp'
 import { bookingRoutes } from './routes/booking'
+import { checkAndSendReminders } from './lib/reminders'
 import cookie from '@fastify/cookie'
 
 const app = fastify({ 
@@ -116,6 +117,15 @@ const start = async () => {
   try {
     await app.listen({ port: 3333, host: '0.0.0.0' })
     console.log('🚀 BarberOS API running on http://localhost:3333')
+
+    // 🕒 Ativar robô de lembretes (roda a cada 10 minutos)
+    setInterval(() => {
+      checkAndSendReminders().catch(err => console.error('Cron Error:', err))
+    }, 10 * 60 * 1000)
+    
+    // Executar uma vez no início
+    checkAndSendReminders().catch(err => console.error('Initial Cron Error:', err))
+
   } catch (err) {
     app.log.error(err)
     process.exit(1)

@@ -1,7 +1,9 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import jwt from 'jsonwebtoken'
+import dayjs from 'dayjs'
 import { prisma } from '../lib/prisma'
+import { whatsappService } from '../lib/whatsapp'
 
 // Rotas públicas para a página de agendamento do cliente
 // Não requerem JWT — usam shop_id como contexto
@@ -182,8 +184,17 @@ export async function bookingRoutes(app: FastifyInstance) {
         client:       { select: { name: true, phone: true } },
         service:      { select: { title: true, price: true } },
         professional: { select: { name: true } },
+        shop:         { select: { name: true } }
       }
     })
+
+    // 🚀 Notificar via WhatsApp (Assíncrono)
+    const instanceName = `barber_${shopId.replace(/-/g, '')}`
+    const msg = `✅ *Agendamento Confirmado!*\n\nOlá ${appointment.client.name}, seu horário na *${appointment.shop.name}* foi confirmado:\n\n📅 *Data:* ${dayjs(appointment.scheduled_at).format('DD/MM/YYYY')}\n⏰ *Hora:* ${dayjs(appointment.scheduled_at).format('HH:mm')}\n💈 *Serviço:* ${appointment.service.title}\n👤 *Barbeiro:* ${appointment.professional.name}\n\nTe esperamos lá! ✂️`
+
+    if (appointment.client.phone) {
+      whatsappService.sendMessage(instanceName, appointment.client.phone, msg).catch(console.error)
+    }
 
     return reply.status(201).send({ appointment })
   })
