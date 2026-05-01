@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { authMiddleware } from '../middlewares/auth'
-import { whatsappService } from '../services/whatsapp'
+import { whatsappService } from '../lib/whatsapp'
 import { prisma } from '../lib/prisma'
 
 export async function whatsappRoutes(app: FastifyInstance) {
