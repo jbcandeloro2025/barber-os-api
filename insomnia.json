@@ -1,0 +1,113 @@
+{
+	"_type": "export",
+	"__export_format": 4,
+	"__export_date": "2024-05-01T18:40:00.000Z",
+	"__export_source": "insomnia.desktop.app:v8.6.1",
+	"resources": [
+		{
+			"_id": "wrk_1",
+			"parentId": null,
+			"name": "BarberOS API",
+			"description": "API completa para gestão de barbearias SaaS",
+			"scope": "collection",
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_1",
+			"parentId": "wrk_1",
+			"name": "Base Environment",
+			"data": {
+				"baseUrl": "https://saas-saas.xvpbl8.easypanel.host",
+				"token": "",
+				"shopId": "ID_DA_SUA_LOJA"
+			},
+			"color": null,
+			"isPrivate": false,
+			"metaSortKey": 1714588800000,
+			"_type": "environment"
+		},
+		{
+			"_id": "fld_auth",
+			"parentId": "wrk_1",
+			"name": "Auth",
+			"metaSortKey": -1000,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_login",
+			"parentId": "fld_auth",
+			"url": "{{ baseUrl }}/auth/login",
+			"name": "Login",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"admin@example.com\",\n\t\"password\": \"123456\"\n}"
+			},
+			"headers": [{ "name": "Content-Type", "value": "application/json" }],
+			"_type": "request"
+		},
+		{
+			"_id": "req_me",
+			"parentId": "fld_auth",
+			"url": "{{ baseUrl }}/auth/me",
+			"name": "Get Me",
+			"method": "GET",
+			"authentication": { "type": "bearer", "token": "{{ token }}" },
+			"_type": "request"
+		},
+		{
+			"_id": "fld_shops",
+			"parentId": "wrk_1",
+			"name": "Shops",
+			"metaSortKey": -900,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_shop_me",
+			"parentId": "fld_shops",
+			"url": "{{ baseUrl }}/shops/me",
+			"name": "Get My Shop",
+			"method": "GET",
+			"authentication": { "type": "bearer", "token": "{{ token }}" },
+			"_type": "request"
+		},
+		{
+			"_id": "fld_public",
+			"parentId": "wrk_1",
+			"name": "Public Booking",
+			"metaSortKey": -200,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_public_config",
+			"parentId": "fld_public",
+			"url": "{{ baseUrl }}/booking/{{ shopId }}/config",
+			"name": "Shop Config",
+			"method": "GET",
+			"_type": "request"
+		},
+		{
+			"_id": "req_public_services",
+			"parentId": "fld_public",
+			"url": "{{ baseUrl }}/booking/{{ shopId }}/services",
+			"name": "List Services",
+			"method": "GET",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_misc",
+			"parentId": "wrk_1",
+			"name": "Misc & System",
+			"metaSortKey": -100,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_health",
+			"parentId": "fld_misc",
+			"url": "{{ baseUrl }}/health",
+			"name": "Health Check",
+			"method": "GET",
+			"_type": "request"
+		}
+	]
+}

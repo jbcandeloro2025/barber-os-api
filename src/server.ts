@@ -45,7 +45,8 @@ app.register(rateLimit, {
 
 // Configuração de CORS
 app.register(cors, {
-  origin: process.env.ALLOWED_ORIGIN || true,
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 })
 
 // Registrar rotas
