@@ -5,7 +5,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-01-27' as any, // Mantendo compatibilidade com a versão mais recente estável
+  apiVersion: '2024-11-20.acacia' as any,
   appInfo: {
     name: 'BarberOS SaaS',
     version: '1.0.0',
