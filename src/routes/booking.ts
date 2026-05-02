@@ -22,7 +22,7 @@ export async function bookingRoutes(app: FastifyInstance) {
 
   // Config pública da loja (nome, logo, cores)
   app.get('/:shopId/config', async (request, reply) => {
-    const { shopId } = z.object({ shopId: z.string().uuid() }).parse(request.params)
+    const { shopId } = z.object({ shopId: z.string().min(1) }).parse(request.params)
 
     const shop = await prisma.shop.findUnique({
       where: { id: shopId },
@@ -36,7 +36,7 @@ export async function bookingRoutes(app: FastifyInstance) {
 
   // Serviços ativos da loja
   app.get('/:shopId/services', async (request, reply) => {
-    const { shopId } = z.object({ shopId: z.string().uuid() }).parse(request.params)
+    const { shopId } = z.object({ shopId: z.string().min(1) }).parse(request.params)
 
     const services = await prisma.service.findMany({
       where: { shop_id: shopId, active: true },
@@ -49,7 +49,7 @@ export async function bookingRoutes(app: FastifyInstance) {
 
   // Profissionais ativos da loja
   app.get('/:shopId/professionals', async (request, reply) => {
-    const { shopId } = z.object({ shopId: z.string().uuid() }).parse(request.params)
+    const { shopId } = z.object({ shopId: z.string().min(1) }).parse(request.params)
 
     const professionals = await prisma.professional.findMany({
       where: { shop_id: shopId, active: true },
@@ -62,7 +62,7 @@ export async function bookingRoutes(app: FastifyInstance) {
 
   // Identificar cliente pelo telefone (cria se não existir)
   app.post('/:shopId/identify', async (request, reply) => {
-    const { shopId } = z.object({ shopId: z.string().uuid() }).parse(request.params)
+    const { shopId } = z.object({ shopId: z.string().min(1) }).parse(request.params)
     const { phone } = z.object({ phone: z.string().min(10) }).parse(request.body)
 
     const shop = await prisma.shop.findUnique({ where: { id: shopId } })
@@ -119,7 +119,7 @@ export async function bookingRoutes(app: FastifyInstance) {
 
   // Horários ocupados do profissional num dado dia
   app.get('/:shopId/slots', async (request, reply) => {
-    const { shopId } = z.object({ shopId: z.string().uuid() }).parse(request.params)
+    const { shopId } = z.object({ shopId: z.string().min(1) }).parse(request.params)
     const { professional_id, date } = z.object({
       professional_id: z.string().uuid(),
       date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -155,7 +155,7 @@ export async function bookingRoutes(app: FastifyInstance) {
 
   // Criar agendamento (cliente público)
   app.post('/:shopId/appointment', async (request, reply) => {
-    const { shopId } = z.object({ shopId: z.string().uuid() }).parse(request.params)
+    const { shopId } = z.object({ shopId: z.string().min(1) }).parse(request.params)
 
     const schema = z.object({
       client_id:       z.string().uuid(),
