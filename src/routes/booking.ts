@@ -9,6 +9,17 @@ import { whatsappService } from '../lib/whatsapp'
 // Não requerem JWT — usam shop_id como contexto
 export async function bookingRoutes(app: FastifyInstance) {
 
+  // Resolve slug → shop id
+  app.get('/resolve/:slug', async (request, reply) => {
+    const { slug } = z.object({ slug: z.string() }).parse(request.params)
+    const shop = await prisma.shop.findFirst({
+      where: { slug },
+      select: { id: true, name: true, logo_url: true, config: true }
+    })
+    if (!shop) return reply.status(404).send({ message: 'Shop not found.' })
+    return { shop }
+  })
+
   // Config pública da loja (nome, logo, cores)
   app.get('/:shopId/config', async (request, reply) => {
     const { shopId } = z.object({ shopId: z.string().uuid() }).parse(request.params)
